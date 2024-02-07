@@ -1,3 +1,13 @@
+!Caution! Do not use, the code is under development
+====================================================
+
+Original code from [pimylifeup](https://github.com/YudiNz/MFRC522-python-SimpleMFRC522).
+`RPi.GPIO` don't support the Raspberry Pi 5. In this fork I refactored the code to support also the Raspberry Pi 5.
+
+
+Original ReadMe-Description:
+-----------------------------
+
 # mfrc522
 
 A python library to read/write RFID tags via the budget MFRC522 RFID module.
