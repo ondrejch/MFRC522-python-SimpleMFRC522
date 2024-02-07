@@ -22,9 +22,9 @@
 #    You should have received a copy of the GNU Lesser General Public License
 #    along with MFRC522-Python.  If not, see <http://www.gnu.org/licenses/>.
 #
-import RPi.GPIO as GPIO
 import spidev
 import logging
+
 
 class MFRC522:
     MAX_LEN = 16
@@ -125,23 +125,16 @@ class MFRC522:
 
     serNum = []
 
-    def __init__(self, bus=0, device=0, spd=1000000, pin_mode=10, pin_rst=-1, debugLevel='WARNING'):
+    def __init__(self, bus=0, device=0, spd=1000000, pin_mode=10, pin_rst=-1, debug_level='WARNING'):
         self.spi = spidev.SpiDev()
         self.spi.open(bus, device)
         self.spi.max_speed_hz = spd
 
         self.logger = logging.getLogger('mfrc522Logger')
         self.logger.addHandler(logging.StreamHandler())
-        level = logging.getLevelName(debugLevel)
+        level = logging.getLevelName(debug_level)
         self.logger.setLevel(level)
 
-        gpioMode = GPIO.getmode()
-        
-        if gpioMode is None:
-            GPIO.setmode(pin_mode)
-        else:
-            pin_mode = gpioMode
-            
         if pin_rst == -1:
             if pin_mode == 11:
                 pin_rst = 15
