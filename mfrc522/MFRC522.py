@@ -151,43 +151,42 @@ class MFRC522:
         self.spi.close()
 
     def set_bit_mask(self, reg, mask):
-        tmp = self.read_mfrc522(reg)
-        self.write_mfrc522(reg, tmp | mask)
+        chip_values = self.read_mfrc522(reg)
+        self.write_mfrc522(reg, chip_values | mask)
 
     def clear_bit_mask(self, reg, mask):
-        tmp = self.read_mfrc522(reg)
-        self.write_mfrc522(reg, tmp & (~mask))
+        chip_values = self.read_mfrc522(reg)
+        self.write_mfrc522(reg, chip_values & (~mask))
 
     def antenna_on(self):
-        temp = self.read_mfrc522(self.TX_CONTROL_REG)
-        if ~(temp & 0x03):
+        chip_values = self.read_mfrc522(self.TX_CONTROL_REG)
+        if ~(chip_values & 0x03):
             self.set_bit_mask(self.TX_CONTROL_REG, 0x03)
 
     def antenna_off(self):
         self.clear_bit_mask(self.TX_CONTROL_REG, 0x03)
 
-    def mfrc522_to_card(self, command, sendData):
-        backData = []
-        backLen = 0
+    def mfrc522_to_card(self, command, send_data):
+        back_data = []
+        back_len = 0
         status = self.MI_ERR
-        irqEn = 0x00
-        waitIRq = 0x00
+        irq_en = 0x00
+        wait_irq = 0x00
 
         if command == self.PCD_AUTHENT:
-            irqEn = 0x12
-            waitIRq = 0x10
+            irq_en = 0x12
+            wait_irq = 0x10
         if command == self.PCD_TRANSCEIVE:
-            irqEn = 0x77
-            waitIRq = 0x30
+            irq_en = 0x77
+            wait_irq = 0x30
 
-        self.write_mfrc522(self.COMMIEN_REG, irqEn | 0x80)
+        self.write_mfrc522(self.COMMIEN_REG, irq_en | 0x80)
         self.clear_bit_mask(self.COMMIRQ_REG, 0x80)
         self.set_bit_mask(self.FIFO_LEVEL_REG, 0x80)
-
         self.write_mfrc522(self.COMMAND_REG, self.PCD_IDLE)
 
-        for i in range(len(sendData)):
-            self.write_mfrc522(self.FIFO_DATA_REG, sendData[i])
+        for data in send_data:
+            self.write_mfrc522(self.FIFO_DATA_REG, data)
 
         self.write_mfrc522(self.COMMAND_REG, command)
 
@@ -198,7 +197,7 @@ class MFRC522:
         while True:
             n = self.read_mfrc522(self.COMMIRQ_REG)
             i -= 1
-            if ~((i != 0) and ~(n & 0x01) and ~(n & waitIRq)):
+            if ~((i != 0) and ~(n & 0x01) and ~(n & wait_irq)):
                 break
 
         self.clear_bit_mask(self.BIT_FRAMING_REG, 0x80)
@@ -207,16 +206,16 @@ class MFRC522:
             if (self.read_mfrc522(self.ERROR_REG) & 0x1B) == 0x00:
                 status = self.MI_OK
 
-                if n & irqEn & 0x01:
+                if n & irq_en & 0x01:
                     status = self.MI_NOTAGERR
 
                 if command == self.PCD_TRANSCEIVE:
                     n = self.read_mfrc522(self.FIFO_LEVEL_REG)
                     lastBits = self.read_mfrc522(self.CONTROL_REG) & 0x07
                     if lastBits != 0:
-                        backLen = (n - 1) * 8 + lastBits
+                        back_len = (n - 1) * 8 + lastBits
                     else:
-                        backLen = n * 8
+                        back_len = n * 8
 
                     if n == 0:
                         n = 1
@@ -224,11 +223,11 @@ class MFRC522:
                         n = self.MAX_LEN
 
                     for i in range(n):
-                        backData.append(self.read_mfrc522(self.FIFO_DATA_REG))
+                        back_data.append(self.read_mfrc522(self.FIFO_DATA_REG))
             else:
                 status = self.MI_ERR
 
-        return (status, backData, backLen)
+        return (status, back_data, back_len)
 
     def mfrc522_request(self, reqMode):
         TagType = []
