@@ -133,8 +133,7 @@ class MFRC522:
 
         self.logger = logging.getLogger('mfrc522Logger')
         self.logger.addHandler(logging.StreamHandler())
-        level = logging.getLevelName(debug_level)
-        self.logger.setLevel(level)
+        self.logger.setLevel(logging.getLevelName(debug_level))
         self.rst = DigitalOutputDevice(pin_rst)
         self.rst.on()
         self.mfrc522_init()
@@ -143,15 +142,13 @@ class MFRC522:
         self.write_mfrc522(self.COMMAND_REG, self.PCD_RESETPHASE)
 
     def write_mfrc522(self, addr, val):
-        val = self.spi.xfer2([(addr << 1) & 0x7E, val])
+        self.spi.xfer2([(addr << 1) & 0x7E, val])
 
     def read_mfrc522(self, addr):
-        val = self.spi.xfer2([((addr << 1) & 0x7E) | 0x80, 0])
-        return val[1]
+        return self.spi.xfer2([((addr << 1) & 0x7E) | 0x80, 0])[1]
 
     def close_mfrc522(self):
         self.spi.close()
-        GPIO.cleanup()
 
     def set_bit_mask(self, reg, mask):
         tmp = self.read_mfrc522(reg)
@@ -163,7 +160,7 @@ class MFRC522:
 
     def antenna_on(self):
         temp = self.read_mfrc522(self.TX_CONTROL_REG)
-        if (~(temp & 0x03)):
+        if ~(temp & 0x03):
             self.set_bit_mask(self.TX_CONTROL_REG, 0x03)
 
     def antenna_off(self):
@@ -175,8 +172,6 @@ class MFRC522:
         status = self.MI_ERR
         irqEn = 0x00
         waitIRq = 0x00
-        lastBits = None
-        n = 0
 
         if command == self.PCD_AUTHENT:
             irqEn = 0x12
@@ -236,8 +231,6 @@ class MFRC522:
         return (status, backData, backLen)
 
     def mfrc522_request(self, reqMode):
-        status = None
-        backBits = None
         TagType = []
 
         self.write_mfrc522(self.BIT_FRAMING_REG, 0x07)
@@ -245,15 +238,13 @@ class MFRC522:
         TagType.append(reqMode)
         (status, backData, backBits) = self.mfrc522_to_card(self.PCD_TRANSCEIVE, TagType)
 
-        if ((status != self.MI_OK) | (backBits != 0x10)):
+        if (status != self.MI_OK) | (backBits != 0x10):
             status = self.MI_ERR
 
-        return (status, backBits)
+        return status, backBits
 
     def mfrc522_anticoll(self):
-        backData = []
         serNumCheck = 0
-
         serNum = []
 
         self.write_mfrc522(self.BIT_FRAMING_REG, 0x00)
@@ -263,8 +254,7 @@ class MFRC522:
 
         (status, backData, backBits) = self.mfrc522_to_card(self.PCD_TRANSCEIVE, serNum)
 
-        if (status == self.MI_OK):
-            i = 0
+        if status == self.MI_OK:
             if len(backData) == 5:
                 for i in range(4):
                     serNumCheck = serNumCheck ^ backData[i]
@@ -272,8 +262,7 @@ class MFRC522:
                     status = self.MI_ERR
             else:
                 status = self.MI_ERR
-
-        return (status, backData)
+        return status, backData
 
     def calulate_crc(self, pIndata):
         self.clear_bit_mask(self.DIVIRQ_REG, 0x04)
@@ -295,7 +284,6 @@ class MFRC522:
         return pOutData
 
     def mfrc522_select_tag(self, serNum):
-        backData = []
         buf = []
         buf.append(self.PICC_SElECTTAG)
         buf.append(0x70)
@@ -335,11 +323,10 @@ class MFRC522:
         (status, backData, backLen) = self.mfrc522_to_card(self.PCD_AUTHENT, buff)
 
         # Check if an error occurred
-        if not (status == self.MI_OK):
+        if not status == self.MI_OK:
             self.logger.error("AUTH ERROR!!")
-        if not (self.read_mfrc522(self.STATUS2_REG) & 0x08) != 0:
+        if not self.read_mfrc522(self.STATUS2_REG) & 0x08 != 0:
             self.logger.error("AUTH ERROR(status2reg & 0x08) != 0")
-
         # Return the status
         return status
 
@@ -354,7 +341,7 @@ class MFRC522:
         recvData.append(pOut[0])
         recvData.append(pOut[1])
         (status, backData, backLen) = self.mfrc522_to_card(self.PCD_TRANSCEIVE, recvData)
-        if not (status == self.MI_OK):
+        if not status == self.MI_OK:
             self.logger.error("Error while reading!")
 
         if len(backData) == 16:
