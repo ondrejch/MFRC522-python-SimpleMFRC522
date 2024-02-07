@@ -1,6 +1,8 @@
-#!/usr/bin/env python
-# -*- coding: utf8 -*-
+#!/usr/bin/env python3
+
+#    Refactored by straub.dennis1@web.de
 #
+#    Original comments:
 #    Copyright 2014,2018 Mario Gomez <mario.gomez@teubi.co>
 #
 #    This file is part of MFRC522-Python
@@ -22,8 +24,6 @@
 #
 import RPi.GPIO as GPIO
 import spidev
-import signal
-import time
 import logging
 
 class MFRC522:
