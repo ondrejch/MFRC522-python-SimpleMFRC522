@@ -56,75 +56,75 @@ class MFRC522:
     MI_NOTAGERR = 1
     MI_ERR = 2
 
-    Reserved00 = 0x00
-    CommandReg = 0x01
-    CommIEnReg = 0x02
-    DivlEnReg = 0x03
-    CommIrqReg = 0x04
-    DivIrqReg = 0x05
-    ErrorReg = 0x06
-    Status1Reg = 0x07
-    Status2Reg = 0x08
-    FIFODataReg = 0x09
-    FIFOLevelReg = 0x0A
-    WaterLevelReg = 0x0B
-    ControlReg = 0x0C
-    BitFramingReg = 0x0D
-    CollReg = 0x0E
-    Reserved01 = 0x0F
+    RESERVED_00 = 0x00
+    COMMAND_REG = 0x01
+    COMMIEN_REG = 0x02
+    DIVLEN_REG = 0x03
+    COMMIRQ_REG = 0x04
+    DIVIRQ_REG = 0x05
+    ERROR_REG = 0x06
+    STATUS1_REG = 0x07
+    STATUS2_REG = 0x08
+    FIFO_DATA_REG = 0x09
+    FIFO_LEVEL_REG = 0x0A
+    WATER_LEVEL_REG = 0x0B
+    CONTROL_REG = 0x0C
+    BIT_FRAMING_REG = 0x0D
+    COLL_REG = 0x0E
+    RESERVED_01 = 0x0F
 
-    Reserved10 = 0x10
-    ModeReg = 0x11
-    TxModeReg = 0x12
-    RxModeReg = 0x13
-    TxControlReg = 0x14
-    TxAutoReg = 0x15
-    TxSelReg = 0x16
-    RxSelReg = 0x17
-    RxThresholdReg = 0x18
-    DemodReg = 0x19
-    Reserved11 = 0x1A
-    Reserved12 = 0x1B
-    MifareReg = 0x1C
-    Reserved13 = 0x1D
-    Reserved14 = 0x1E
-    SerialSpeedReg = 0x1F
+    RESERVED_10 = 0x10
+    MODE_REG = 0x11
+    TX_MODE_REG = 0x12
+    RX_MODE_REG = 0x13
+    TX_CONTROL_REG = 0x14
+    TX_AUTO_REG = 0x15
+    TX_SEL_REG = 0x16
+    RX_SEL_REG = 0x17
+    RX_THRESHOLD_REG = 0x18
+    DEMOD_REG = 0x19
+    RESERVED_11 = 0x1A
+    RESERVED_12 = 0x1B
+    MIFARE_REG = 0x1C
+    RESERVED_13 = 0x1D
+    RESERVED_14 = 0x1E
+    SERIAL_SPEED_REG = 0x1F
 
-    Reserved20 = 0x20
-    CRCResultRegM = 0x21
-    CRCResultRegL = 0x22
-    Reserved21 = 0x23
-    ModWidthReg = 0x24
-    Reserved22 = 0x25
-    RFCfgReg = 0x26
-    GsNReg = 0x27
-    CWGsPReg = 0x28
-    ModGsPReg = 0x29
-    TModeReg = 0x2A
-    TPrescalerReg = 0x2B
-    TReloadRegH = 0x2C
-    TReloadRegL = 0x2D
-    TCounterValueRegH = 0x2E
-    TCounterValueRegL = 0x2F
+    RESERVED_20 = 0x20
+    CRC_RESULT_REG_M = 0x21
+    CRC_RESULT_REG_L = 0x22
+    RESERVED_21 = 0x23
+    MOD_WIDTH_REG = 0x24
+    RESERVED_22 = 0x25
+    RFCFG_REG = 0x26
+    GSN_REG = 0x27
+    CWGSP_REG = 0x28
+    MOD_GSP_REG = 0x29
+    T_MODE_REG = 0x2A
+    T_PRESCALER_REG = 0x2B
+    TRELOAD_REG_H = 0x2C
+    TRELOAD_REG_L = 0x2D
+    T_COUNTER_VALUE_REG_H = 0x2E
+    T_COUNTER_VALUE_REG_L = 0x2F
 
-    Reserved30 = 0x30
-    TestSel1Reg = 0x31
-    TestSel2Reg = 0x32
-    TestPinEnReg = 0x33
-    TestPinValueReg = 0x34
-    TestBusReg = 0x35
-    AutoTestReg = 0x36
-    VersionReg = 0x37
-    AnalogTestReg = 0x38
-    TestDAC1Reg = 0x39
-    TestDAC2Reg = 0x3A
-    TestADCReg = 0x3B
-    Reserved31 = 0x3C
-    Reserved32 = 0x3D
-    Reserved33 = 0x3E
-    Reserved34 = 0x3F
+    RESERVED_30 = 0x30
+    TEST_SEL1_REG = 0x31
+    TEST_SEL2_REG = 0x32
+    TEST_PINEN_REG = 0x33
+    TEST_PIN_VALUE_REG = 0x34
+    TEST_BUS_REG = 0x35
+    AUTO_TEST_REG = 0x36
+    VERSION_REG = 0x37
+    ANALOG_TEST_REG = 0x38
+    TEST_DAC1_REG = 0x39
+    TEST_DAC2_REG = 0x3A
+    TEST_ADC_REG = 0x3B
+    RESERVED_31 = 0x3C
+    RESERVED_32 = 0x3D
+    RESERVED_33 = 0x3E
+    RESERVED_34 = 0x3F
 
-    serNum = []
+    SERNUM = []
 
     def __init__(self, bus=0, device=0, spd=1000000, pin_rst=15, debug_level='WARNING'):
         self.spi = spidev.SpiDev()
@@ -140,7 +140,7 @@ class MFRC522:
         self.mfrc522_init()
 
     def mfrc522_reset(self):
-        self.write_mfrc522(self.CommandReg, self.PCD_RESETPHASE)
+        self.write_mfrc522(self.COMMAND_REG, self.PCD_RESETPHASE)
 
     def write_mfrc522(self, addr, val):
         val = self.spi.xfer2([(addr << 1) & 0x7E, val])
@@ -162,12 +162,12 @@ class MFRC522:
         self.write_mfrc522(reg, tmp & (~mask))
 
     def antenna_on(self):
-        temp = self.read_mfrc522(self.TxControlReg)
+        temp = self.read_mfrc522(self.TX_CONTROL_REG)
         if (~(temp & 0x03)):
-            self.set_bit_mask(self.TxControlReg, 0x03)
+            self.set_bit_mask(self.TX_CONTROL_REG, 0x03)
 
     def antenna_off(self):
-        self.clear_bit_mask(self.TxControlReg, 0x03)
+        self.clear_bit_mask(self.TX_CONTROL_REG, 0x03)
 
     def mfrc522_to_card(self, command, sendData):
         backData = []
@@ -185,39 +185,39 @@ class MFRC522:
             irqEn = 0x77
             waitIRq = 0x30
 
-        self.write_mfrc522(self.CommIEnReg, irqEn | 0x80)
-        self.clear_bit_mask(self.CommIrqReg, 0x80)
-        self.set_bit_mask(self.FIFOLevelReg, 0x80)
+        self.write_mfrc522(self.COMMIEN_REG, irqEn | 0x80)
+        self.clear_bit_mask(self.COMMIRQ_REG, 0x80)
+        self.set_bit_mask(self.FIFO_LEVEL_REG, 0x80)
 
-        self.write_mfrc522(self.CommandReg, self.PCD_IDLE)
+        self.write_mfrc522(self.COMMAND_REG, self.PCD_IDLE)
 
         for i in range(len(sendData)):
-            self.write_mfrc522(self.FIFODataReg, sendData[i])
+            self.write_mfrc522(self.FIFO_DATA_REG, sendData[i])
 
-        self.write_mfrc522(self.CommandReg, command)
+        self.write_mfrc522(self.COMMAND_REG, command)
 
         if command == self.PCD_TRANSCEIVE:
-            self.set_bit_mask(self.BitFramingReg, 0x80)
+            self.set_bit_mask(self.BIT_FRAMING_REG, 0x80)
 
         i = 2000
         while True:
-            n = self.read_mfrc522(self.CommIrqReg)
+            n = self.read_mfrc522(self.COMMIRQ_REG)
             i -= 1
             if ~((i != 0) and ~(n & 0x01) and ~(n & waitIRq)):
                 break
 
-        self.clear_bit_mask(self.BitFramingReg, 0x80)
+        self.clear_bit_mask(self.BIT_FRAMING_REG, 0x80)
 
         if i != 0:
-            if (self.read_mfrc522(self.ErrorReg) & 0x1B) == 0x00:
+            if (self.read_mfrc522(self.ERROR_REG) & 0x1B) == 0x00:
                 status = self.MI_OK
 
                 if n & irqEn & 0x01:
                     status = self.MI_NOTAGERR
 
                 if command == self.PCD_TRANSCEIVE:
-                    n = self.read_mfrc522(self.FIFOLevelReg)
-                    lastBits = self.read_mfrc522(self.ControlReg) & 0x07
+                    n = self.read_mfrc522(self.FIFO_LEVEL_REG)
+                    lastBits = self.read_mfrc522(self.CONTROL_REG) & 0x07
                     if lastBits != 0:
                         backLen = (n - 1) * 8 + lastBits
                     else:
@@ -229,7 +229,7 @@ class MFRC522:
                         n = self.MAX_LEN
 
                     for i in range(n):
-                        backData.append(self.read_mfrc522(self.FIFODataReg))
+                        backData.append(self.read_mfrc522(self.FIFO_DATA_REG))
             else:
                 status = self.MI_ERR
 
@@ -240,7 +240,7 @@ class MFRC522:
         backBits = None
         TagType = []
 
-        self.write_mfrc522(self.BitFramingReg, 0x07)
+        self.write_mfrc522(self.BIT_FRAMING_REG, 0x07)
 
         TagType.append(reqMode)
         (status, backData, backBits) = self.mfrc522_to_card(self.PCD_TRANSCEIVE, TagType)
@@ -256,7 +256,7 @@ class MFRC522:
 
         serNum = []
 
-        self.write_mfrc522(self.BitFramingReg, 0x00)
+        self.write_mfrc522(self.BIT_FRAMING_REG, 0x00)
 
         serNum.append(self.PICC_ANTICOLL)
         serNum.append(0x20)
@@ -276,22 +276,22 @@ class MFRC522:
         return (status, backData)
 
     def calulate_crc(self, pIndata):
-        self.clear_bit_mask(self.DivIrqReg, 0x04)
-        self.set_bit_mask(self.FIFOLevelReg, 0x80)
+        self.clear_bit_mask(self.DIVIRQ_REG, 0x04)
+        self.set_bit_mask(self.FIFO_LEVEL_REG, 0x80)
 
         for i in range(len(pIndata)):
-            self.write_mfrc522(self.FIFODataReg, pIndata[i])
+            self.write_mfrc522(self.FIFO_DATA_REG, pIndata[i])
 
-        self.write_mfrc522(self.CommandReg, self.PCD_CALCCRC)
+        self.write_mfrc522(self.COMMAND_REG, self.PCD_CALCCRC)
         i = 0xFF
         while True:
-            n = self.read_mfrc522(self.DivIrqReg)
+            n = self.read_mfrc522(self.DIVIRQ_REG)
             i -= 1
             if not ((i != 0) and not (n & 0x04)):
                 break
         pOutData = []
-        pOutData.append(self.read_mfrc522(self.CRCResultRegL))
-        pOutData.append(self.read_mfrc522(self.CRCResultRegM))
+        pOutData.append(self.read_mfrc522(self.CRC_RESULT_REG_L))
+        pOutData.append(self.read_mfrc522(self.CRC_RESULT_REG_M))
         return pOutData
 
     def mfrc522_select_tag(self, serNum):
@@ -337,14 +337,14 @@ class MFRC522:
         # Check if an error occurred
         if not (status == self.MI_OK):
             self.logger.error("AUTH ERROR!!")
-        if not (self.read_mfrc522(self.Status2Reg) & 0x08) != 0:
+        if not (self.read_mfrc522(self.STATUS2_REG) & 0x08) != 0:
             self.logger.error("AUTH ERROR(status2reg & 0x08) != 0")
 
         # Return the status
         return status
 
     def mfrc522_stop_crypto1(self):
-        self.clear_bit_mask(self.Status2Reg, 0x08)
+        self.clear_bit_mask(self.STATUS2_REG, 0x08)
 
     def mfrc522_read(self, blockAddr):
         recvData = []
@@ -402,11 +402,11 @@ class MFRC522:
     def mfrc522_init(self):
         self.mfrc522_reset()
 
-        self.write_mfrc522(self.TModeReg, 0x8D)
-        self.write_mfrc522(self.TPrescalerReg, 0x3E)
-        self.write_mfrc522(self.TReloadRegL, 30)
-        self.write_mfrc522(self.TReloadRegH, 0)
+        self.write_mfrc522(self.T_MODE_REG, 0x8D)
+        self.write_mfrc522(self.T_PRESCALER_REG, 0x3E)
+        self.write_mfrc522(self.TRELOAD_REG_L, 30)
+        self.write_mfrc522(self.TRELOAD_REG_H, 0)
 
-        self.write_mfrc522(self.TxAutoReg, 0x40)
-        self.write_mfrc522(self.ModeReg, 0x3D)
+        self.write_mfrc522(self.TX_AUTO_REG, 0x40)
+        self.write_mfrc522(self.MODE_REG, 0x3D)
         self.antenna_on()
