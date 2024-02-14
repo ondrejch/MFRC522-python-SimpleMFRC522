@@ -224,25 +224,17 @@ class MFRC522:
         return status, back_bits
 
     def mfrc522_anticoll(self):
-        serNumCheck = 0
-        serNum = []
-
         self.write_mfrc522(self.BIT_FRAMING_REG, 0x00)
-
-        serNum.append(self.PICC_ANTICOLL)
-        serNum.append(0x20)
-
-        (status, backData, backBits) = self.mfrc522_to_card(self.PCD_TRANSCEIVE, serNum)
-
-        if status == self.MI_OK:
-            if len(backData) == 5:
-                for i in range(4):
-                    serNumCheck = serNumCheck ^ backData[i]
-                if serNumCheck != backData[4]:
-                    status = self.MI_ERR
-            else:
-                status = self.MI_ERR
-        return status, backData
+        status, back_data, _ = self.mfrc522_to_card(self.PCD_TRANSCEIVE, [self.PICC_ANTICOLL, 0x20])
+        serial_number = 0
+        for data in back_data:
+            serial_number ^= data
+        try:
+            if serial_number != back_data[4]:
+                return self.MI_ERR, back_data
+        except KeyError:
+            return self.MI_ERR, back_data
+        return status, back_data
 
     def calulate_crc(self, pIndata):
         self.clear_bit_mask(self.DIVIRQ_REG, 0x04)
