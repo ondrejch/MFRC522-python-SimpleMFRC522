@@ -275,20 +275,15 @@ class MFRC522:
     def mfrc522_stop_crypto1(self):
         self.clear_bit_mask(self.STATUS2_REG, 0x08)
 
-    def mfrc522_read(self, blockAddr):
-        recvData = []
-        recvData.append(self.PICC_READ)
-        recvData.append(blockAddr)
-        pOut = self.calculate_crc(recvData)
-        recvData.append(pOut[0])
-        recvData.append(pOut[1])
-        (status, backData, backLen) = self.mfrc522_to_card(self.PCD_TRANSCEIVE, recvData)
-        if not status == self.MI_OK:
+    def mfrc522_read(self, block_address):
+        receive_data = [self.PICC_READ, block_address]
+        receive_data.extend(self.calculate_crc(receive_data))
+        status, back_data, _ = self.mfrc522_to_card(self.PCD_TRANSCEIVE, receive_data)
+        if status != self.MI_OK:
             self.logger.error("Error while reading!")
-
-        if len(backData) == 16:
-            self.logger.debug("Sector " + str(blockAddr) + " " + str(backData))
-            return backData
+        if len(back_data) == 16:
+            self.logger.debug(f"Sector {block_address} {back_data}")
+            return back_data
         else:
             return None
 
