@@ -236,24 +236,18 @@ class MFRC522:
             return self.MI_ERR, back_data
         return status, back_data
 
-    def calulate_crc(self, pIndata):
+    def calculate_crc(self, in_data):
         self.clear_bit_mask(self.DIVIRQ_REG, 0x04)
         self.set_bit_mask(self.FIFO_LEVEL_REG, 0x80)
 
-        for i in range(len(pIndata)):
-            self.write_mfrc522(self.FIFO_DATA_REG, pIndata[i])
-
+        for data in in_data:
+            self.write_mfrc522(self.FIFO_DATA_REG, data)
         self.write_mfrc522(self.COMMAND_REG, self.PCD_CALCCRC)
-        i = 0xFF
-        while True:
-            n = self.read_mfrc522(self.DIVIRQ_REG)
-            i -= 1
-            if not ((i != 0) and not (n & 0x04)):
+
+        for _ in range(255):
+            if self.read_mfrc522(self.DIVIRQ_REG) & 0x04:
                 break
-        pOutData = []
-        pOutData.append(self.read_mfrc522(self.CRC_RESULT_REG_L))
-        pOutData.append(self.read_mfrc522(self.CRC_RESULT_REG_M))
-        return pOutData
+        return [self.read_mfrc522(self.CRC_RESULT_REG_L), self.read_mfrc522(self.CRC_RESULT_REG_M)]
 
     def mfrc522_select_tag(self, serNum):
         buf = []
@@ -263,7 +257,7 @@ class MFRC522:
         for i in range(5):
             buf.append(serNum[i])
 
-        pOut = self.calulate_crc(buf)
+        pOut = self.calculate_crc(buf)
         buf.append(pOut[0])
         buf.append(pOut[1])
         (status, backData, backLen) = self.mfrc522_to_card(self.PCD_TRANSCEIVE, buf)
@@ -309,7 +303,7 @@ class MFRC522:
         recvData = []
         recvData.append(self.PICC_READ)
         recvData.append(blockAddr)
-        pOut = self.calulate_crc(recvData)
+        pOut = self.calculate_crc(recvData)
         recvData.append(pOut[0])
         recvData.append(pOut[1])
         (status, backData, backLen) = self.mfrc522_to_card(self.PCD_TRANSCEIVE, recvData)
@@ -326,7 +320,7 @@ class MFRC522:
         buff = []
         buff.append(self.PICC_WRITE)
         buff.append(blockAddr)
-        crc = self.calulate_crc(buff)
+        crc = self.calculate_crc(buff)
         buff.append(crc[0])
         buff.append(crc[1])
         (status, backData, backLen) = self.mfrc522_to_card(self.PCD_TRANSCEIVE, buff)
@@ -339,7 +333,7 @@ class MFRC522:
             for i in range(16):
                 buf.append(writeData[i])
 
-            crc = self.calulate_crc(buf)
+            crc = self.calculate_crc(buf)
             buf.append(crc[0])
             buf.append(crc[1])
             (status, backData, backLen) = self.mfrc522_to_card(self.PCD_TRANSCEIVE, buf)
