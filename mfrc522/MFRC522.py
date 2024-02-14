@@ -167,18 +167,14 @@ class MFRC522:
         self.clear_bit_mask(self.TX_CONTROL_REG, 0x03)
 
     def mfrc522_to_card(self, command, send_data):
-        back_data = []
-        back_len = 0
-        status = self.MI_ERR
-        irq_en = 0x00
-        wait_irq = 0x00
-
         if command == self.PCD_AUTHENT:
             irq_en = 0x12
             wait_irq = 0x10
-        if command == self.PCD_TRANSCEIVE:
+        elif command == self.PCD_TRANSCEIVE:
             irq_en = 0x77
             wait_irq = 0x30
+        else:
+            return self.MI_ERR, [], 0
 
         self.write_mfrc522(self.COMMIEN_REG, irq_en | 0x80)
         self.clear_bit_mask(self.COMMIRQ_REG, 0x80)
@@ -193,41 +189,34 @@ class MFRC522:
         if command == self.PCD_TRANSCEIVE:
             self.set_bit_mask(self.BIT_FRAMING_REG, 0x80)
 
-        i = 2000
-        while True:
-            n = self.read_mfrc522(self.COMMIRQ_REG)
-            i -= 1
-            if ~((i != 0) and ~(n & 0x01) and ~(n & wait_irq)):
+        for index in range(2000):
+            chip_value = self.read_mfrc522(self.COMMIRQ_REG)
+            if index != 0 and chip_value & 0x01 and chip_value & wait_irq:
                 break
 
         self.clear_bit_mask(self.BIT_FRAMING_REG, 0x80)
 
-        if i != 0:
-            if (self.read_mfrc522(self.ERROR_REG) & 0x1B) == 0x00:
-                status = self.MI_OK
+        if not bool(self.read_mfrc522(self.ERROR_REG) & 0x1B):
+            status = self.MI_NOTAGERR if chip_value & irq_en & 0x01 else self.MI_OK
 
-                if n & irq_en & 0x01:
-                    status = self.MI_NOTAGERR
+            if command == self.PCD_TRANSCEIVE:
+                return self.send_and_get_data(status)
+        return self.MI_ERR, [], 0
 
-                if command == self.PCD_TRANSCEIVE:
-                    n = self.read_mfrc522(self.FIFO_LEVEL_REG)
-                    lastBits = self.read_mfrc522(self.CONTROL_REG) & 0x07
-                    if lastBits != 0:
-                        back_len = (n - 1) * 8 + lastBits
-                    else:
-                        back_len = n * 8
+    def send_and_get_data(self, status):
+        chip_value = self.read_mfrc522(self.FIFO_LEVEL_REG)
+        last_bits = self.read_mfrc522(self.CONTROL_REG) & 0x07
+        back_len = (
+            (chip_value - 1) * 8 + last_bits if last_bits != 0 else chip_value * 8
+        )
+        if chip_value == 0:
+            chip_value = 1
+        elif chip_value > self.MAX_LEN:
+            chip_value = self.MAX_LEN
+        back_data = [self.read_mfrc522(self.FIFO_DATA_REG) for _ in range(chip_value)]
+        return status, back_data, back_len
 
-                    if n == 0:
-                        n = 1
-                    if n > self.MAX_LEN:
-                        n = self.MAX_LEN
 
-                    for i in range(n):
-                        back_data.append(self.read_mfrc522(self.FIFO_DATA_REG))
-            else:
-                status = self.MI_ERR
-
-        return (status, back_data, back_len)
 
     def mfrc522_request(self, reqMode):
         TagType = []
