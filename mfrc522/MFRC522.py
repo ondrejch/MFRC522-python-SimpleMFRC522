@@ -287,30 +287,27 @@ class MFRC522:
         else:
             return None
 
-    def mfrc522_write(self, blockAddr, writeData):
-        buff = []
-        buff.append(self.PICC_WRITE)
-        buff.append(blockAddr)
-        crc = self.calculate_crc(buff)
-        buff.append(crc[0])
-        buff.append(crc[1])
-        (status, backData, backLen) = self.mfrc522_to_card(self.PCD_TRANSCEIVE, buff)
-        if not (status == self.MI_OK) or not (backLen == 4) or not ((backData[0] & 0x0F) == 0x0A):
+
+
+
+    def mfrc522_write(self, block_address, write_data):
+        buffer = [self.PICC_WRITE, block_address]
+        buffer.extend(self.calculate_crc(buffer))
+        status, back_data, back_len = self.mfrc522_to_card(self.PCD_TRANSCEIVE, buffer)
+        if status != self.MI_OK or back_len != 4 or  (back_data[0] & 0x0F) != 0x0A:
             status = self.MI_ERR
-
-        self.logger.debug("%s backdata &0x0F == 0x0A %s" % (backLen, backData[0] & 0x0F))
+        self.logger.debug(f"{back_len} backdata &0x0F == 0x0A {back_data[0] & 15}")
         if status == self.MI_OK:
-            buf = []
-            for i in range(16):
-                buf.append(writeData[i])
-
-            crc = self.calculate_crc(buf)
-            buf.append(crc[0])
-            buf.append(crc[1])
-            (status, backData, backLen) = self.mfrc522_to_card(self.PCD_TRANSCEIVE, buf)
-            if not (status == self.MI_OK) or not (backLen == 4) or not ((backData[0] & 0x0F) == 0x0A):
+            buffer = [data for index, data in enumerate(write_data) if index < 16]
+            buffer.extend(self.calculate_crc(buffer))
+            status, back_data, back_len = self.mfrc522_to_card(self.PCD_TRANSCEIVE, buffer)
+            if (
+                status != self.MI_OK
+                or back_len != 4
+                or back_data[0] & 0x0F != 0x0A
+            ):
                 self.logger.error("Error while writing")
-            if status == self.MI_OK:
+            else:
                 self.logger.debug("Data written")
 
 
@@ -334,3 +331,7 @@ class MFRC522:
         self.write_mfrc522(self.TX_AUTO_REG, 0x40)
         self.write_mfrc522(self.MODE_REG, 0x3D)
         self.antenna_on()
+
+
+def _make_buffer(*args):
+    return list(args)
