@@ -249,22 +249,15 @@ class MFRC522:
                 break
         return [self.read_mfrc522(self.CRC_RESULT_REG_L), self.read_mfrc522(self.CRC_RESULT_REG_M)]
 
-    def mfrc522_select_tag(self, serNum):
-        buf = []
-        buf.append(self.PICC_SElECTTAG)
-        buf.append(0x70)
-        
-        for i in range(5):
-            buf.append(serNum[i])
+    def mfrc522_select_tag(self, serial_number):
+        buffer = [self.PICC_SElECTTAG, 0x70]
+        buffer.extend(serial_number)
+        buffer.extend(self.calculate_crc(buffer))
+        status, back_data, back_len = self.mfrc522_to_card(self.PCD_TRANSCEIVE, buffer)
 
-        pOut = self.calculate_crc(buf)
-        buf.append(pOut[0])
-        buf.append(pOut[1])
-        (status, backData, backLen) = self.mfrc522_to_card(self.PCD_TRANSCEIVE, buf)
-
-        if (status == self.MI_OK) and (backLen == 0x18):
-            self.logger.debug("Size: " + str(backData[0]))
-            return backData[0]
+        if status == self.MI_OK and back_len == 0x18:
+            self.logger.debug(f"Size: {str(back_data[0])}")
+            return back_data[0]
         else:
             return 0
 
