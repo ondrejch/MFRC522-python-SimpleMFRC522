@@ -1,7 +1,7 @@
 # Code by Simon Monk https://github.com/simonmonk/
 
 from . import MFRC522
-import RPi.GPIO as GPIO
+
   
 class SimpleMFRC522:
 
@@ -26,34 +26,34 @@ class SimpleMFRC522:
     return id
 
   def read_id_no_block(self):
-      (status, TagType) = self.READER.MFRC522_Request(self.READER.PICC_REQIDL)
+      (status, TagType) = self.READER.mfrc522_request(self.READER.PICC_REQIDL)
       if status != self.READER.MI_OK:
           return None
-      (status, uid) = self.READER.MFRC522_Anticoll()
+      (status, uid) = self.READER.mfrc522_anticoll()
       if status != self.READER.MI_OK:
           return None
       return self.uid_to_num(uid)
   
   def read_no_block(self):
-    (status, TagType) = self.READER.MFRC522_Request(self.READER.PICC_REQIDL)
+    (status, TagType) = self.READER.mfrc522_request(self.READER.PICC_REQIDL)
     if status != self.READER.MI_OK:
         return None, None
-    (status, uid) = self.READER.MFRC522_Anticoll()
+    (status, uid) = self.READER.mfrc522_anticoll()
     if status != self.READER.MI_OK:
         return None, None
     id = self.uid_to_num(uid)
-    self.READER.MFRC522_SelectTag(uid)
-    status = self.READER.MFRC522_Auth(self.READER.PICC_AUTHENT1A, 11, self.KEY, uid)
+    self.READER.mfrc522_select_tag(uid)
+    status = self.READER.mfrc522_auth(self.READER.PICC_AUTHENT1A, 11, self.KEY, uid)
     data = []
     text_read = ''
     if status == self.READER.MI_OK:
         for block_num in self.BLOCK_ADDRS:
-            block = self.READER.MFRC522_Read(block_num) 
+            block = self.READER.mfrc522_read(block_num)
             if block:
             		data += block
         if data:
              text_read = ''.join(chr(i) for i in data)
-    self.READER.MFRC522_StopCrypto1()
+    self.READER.mfrc522_stop_crypto1()
     return id, text_read
     
   def write(self, text):
@@ -63,24 +63,24 @@ class SimpleMFRC522:
       return id, text_in
 
   def write_no_block(self, text):
-      (status, TagType) = self.READER.MFRC522_Request(self.READER.PICC_REQIDL)
+      (status, TagType) = self.READER.mfrc522_request(self.READER.PICC_REQIDL)
       if status != self.READER.MI_OK:
           return None, None
-      (status, uid) = self.READER.MFRC522_Anticoll()
+      (status, uid) = self.READER.mfrc522_anticoll()
       if status != self.READER.MI_OK:
           return None, None
       id = self.uid_to_num(uid)
-      self.READER.MFRC522_SelectTag(uid)
-      status = self.READER.MFRC522_Auth(self.READER.PICC_AUTHENT1A, 11, self.KEY, uid)
-      self.READER.MFRC522_Read(11)
+      self.READER.mfrc522_select_tag(uid)
+      status = self.READER.mfrc522_auth(self.READER.PICC_AUTHENT1A, 11, self.KEY, uid)
+      self.READER.mfrc522_read(11)
       if status == self.READER.MI_OK:
           data = bytearray()
           data.extend(bytearray(text.ljust(len(self.BLOCK_ADDRS) * 16).encode('ascii')))
           i = 0
           for block_num in self.BLOCK_ADDRS:
-            self.READER.MFRC522_Write(block_num, data[(i*16):(i+1)*16])
+            self.READER.mfrc522_write(block_num, data[(i * 16):(i + 1) * 16])
             i += 1
-      self.READER.MFRC522_StopCrypto1()
+      self.READER.mfrc522_stop_crypto1()
       return id, text[0:(len(self.BLOCK_ADDRS) * 16)]
       
   def uid_to_num(self, uid):
