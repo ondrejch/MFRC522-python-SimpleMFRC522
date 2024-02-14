@@ -22,8 +22,9 @@
 #    You should have received a copy of the GNU Lesser General Public License
 #    along with MFRC522-Python.  If not, see <http://www.gnu.org/licenses/>.
 #
-import spidev
 import logging
+
+import spidev
 from gpiozero import DigitalOutputDevice
 
 
@@ -126,12 +127,12 @@ class MFRC522:
 
     SERNUM = []
 
-    def __init__(self, bus=0, device=0, spd=1000000, pin_rst=15, debug_level='WARNING'):
+    def __init__(self, bus=0, device=0, spd=1000000, pin_rst=15, debug_level="WARNING"):
         self.spi = spidev.SpiDev()
         self.spi.open(bus, device)
         self.spi.max_speed_hz = spd
 
-        self.logger = logging.getLogger('mfrc522Logger')
+        self.logger = logging.getLogger("mfrc522Logger")
         self.logger.addHandler(logging.StreamHandler())
         self.logger.setLevel(logging.getLevelName(debug_level))
         self.rst = DigitalOutputDevice(pin_rst)
@@ -225,7 +226,9 @@ class MFRC522:
 
     def mfrc522_anticoll(self):
         self.write_mfrc522(self.BIT_FRAMING_REG, 0x00)
-        status, back_data, _ = self.mfrc522_to_card(self.PCD_TRANSCEIVE, [self.PICC_ANTICOLL, 0x20])
+        status, back_data, _ = self.mfrc522_to_card(
+            self.PCD_TRANSCEIVE, [self.PICC_ANTICOLL, 0x20]
+        )
         serial_number = 0
         for data in back_data:
             serial_number ^= data
@@ -247,7 +250,10 @@ class MFRC522:
         for _ in range(255):
             if self.read_mfrc522(self.DIVIRQ_REG) & 0x04:
                 break
-        return [self.read_mfrc522(self.CRC_RESULT_REG_L), self.read_mfrc522(self.CRC_RESULT_REG_M)]
+        return [
+            self.read_mfrc522(self.CRC_RESULT_REG_L),
+            self.read_mfrc522(self.CRC_RESULT_REG_M),
+        ]
 
     def mfrc522_select_tag(self, serial_number):
         buffer = [self.PICC_SElECTTAG, 0x70]
@@ -287,34 +293,27 @@ class MFRC522:
         else:
             return None
 
-
-
-
     def mfrc522_write(self, block_address, write_data):
         buffer = [self.PICC_WRITE, block_address]
         buffer.extend(self.calculate_crc(buffer))
         status, back_data, back_len = self.mfrc522_to_card(self.PCD_TRANSCEIVE, buffer)
-        if status != self.MI_OK or back_len != 4 or  (back_data[0] & 0x0F) != 0x0A:
+        if status != self.MI_OK or back_len != 4 or (back_data[0] & 0x0F) != 0x0A:
             status = self.MI_ERR
         self.logger.debug(f"{back_len} backdata &0x0F == 0x0A {back_data[0] & 15}")
         if status == self.MI_OK:
             buffer = [data for index, data in enumerate(write_data) if index < 16]
             buffer.extend(self.calculate_crc(buffer))
-            status, back_data, back_len = self.mfrc522_to_card(self.PCD_TRANSCEIVE, buffer)
-            if (
-                status != self.MI_OK
-                or back_len != 4
-                or back_data[0] & 0x0F != 0x0A
-            ):
+            status, back_data, back_len = self.mfrc522_to_card(
+                self.PCD_TRANSCEIVE, buffer
+            )
+            if status != self.MI_OK or back_len != 4 or back_data[0] & 0x0F != 0x0A:
                 self.logger.error("Error while writing")
             else:
                 self.logger.debug("Data written")
 
-
     def mfrc522_dump_classic1_k(self, key, uid):
         for i in range(64):
             status = self.mfrc522_auth(self.PICC_AUTHENT1A, i, key, uid)
-            # Check if authenticated
             if status == self.MI_OK:
                 self.mfrc522_read(i)
             else:
@@ -331,7 +330,3 @@ class MFRC522:
         self.write_mfrc522(self.TX_AUTO_REG, 0x40)
         self.write_mfrc522(self.MODE_REG, 0x3D)
         self.antenna_on()
-
-
-def _make_buffer(*args):
-    return list(args)
