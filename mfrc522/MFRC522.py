@@ -216,20 +216,12 @@ class MFRC522:
         back_data = [self.read_mfrc522(self.FIFO_DATA_REG) for _ in range(chip_value)]
         return status, back_data, back_len
 
-
-
-    def mfrc522_request(self, reqMode):
-        TagType = []
-
+    def mfrc522_request(self, req_mode):
         self.write_mfrc522(self.BIT_FRAMING_REG, 0x07)
-
-        TagType.append(reqMode)
-        (status, backData, backBits) = self.mfrc522_to_card(self.PCD_TRANSCEIVE, TagType)
-
-        if (status != self.MI_OK) | (backBits != 0x10):
+        status, _, back_bits = self.mfrc522_to_card(self.PCD_TRANSCEIVE, [req_mode])
+        if status != self.MI_OK or back_bits != 0x10:
             status = self.MI_ERR
-
-        return status, backBits
+        return status, back_bits
 
     def mfrc522_anticoll(self):
         serNumCheck = 0
