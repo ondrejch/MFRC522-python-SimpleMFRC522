@@ -256,37 +256,20 @@ class MFRC522:
         status, back_data, back_len = self.mfrc522_to_card(self.PCD_TRANSCEIVE, buffer)
 
         if status == self.MI_OK and back_len == 0x18:
-            self.logger.debug(f"Size: {str(back_data[0])}")
+            self.logger.debug(f"Size: {back_data[0]}")
             return back_data[0]
         else:
             return 0
 
-    def mfrc522_auth(self, authMode, BlockAddr, Sectorkey, serNum):
-        buff = []
-
-        # First byte should be the authMode (A or B)
-        buff.append(authMode)
-
-        # Second byte is the trailerBlock (usually 7)
-        buff.append(BlockAddr)
-
-        # Now we need to append the authKey which usually is 6 bytes of 0xFF
-        for i in range(len(Sectorkey)):
-            buff.append(Sectorkey[i])
-
-        # Next we append the first 4 bytes of the UID
-        for i in range(4):
-            buff.append(serNum[i])
-
-        # Now we start the authentication itself
-        (status, backData, backLen) = self.mfrc522_to_card(self.PCD_AUTHENT, buff)
-
-        # Check if an error occurred
-        if not status == self.MI_OK:
+    def mfrc522_auth(self, auth_mode, block_address, sector_keys, serial_numbers):
+        buffer = [auth_mode, block_address]
+        buffer.extend(sector_keys)
+        buffer.extend(serial_numbers[:4])
+        status, _, _ = self.mfrc522_to_card(self.PCD_AUTHENT, buffer)
+        if status != self.MI_OK:
             self.logger.error("AUTH ERROR!!")
-        if not self.read_mfrc522(self.STATUS2_REG) & 0x08 != 0:
+        if self.read_mfrc522(self.STATUS2_REG) & 0x08 == 0:
             self.logger.error("AUTH ERROR(status2reg & 0x08) != 0")
-        # Return the status
         return status
 
     def mfrc522_stop_crypto1(self):
