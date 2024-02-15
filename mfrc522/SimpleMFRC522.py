@@ -26,7 +26,7 @@ class SimpleMFRC522:
         if status != self.reader.MI_OK:
             return None
         status, uid = self.reader.mfrc522_anticoll()
-        return None if status != self.reader.MI_OK else self.uid_to_num(uid)
+        return None if status != self.reader.MI_OK else self.uid_to_number(uid)
 
     def read_no_block(self):
         status, _ = self.reader.mfrc522_request(self.reader.PICC_REQIDL)
@@ -35,7 +35,7 @@ class SimpleMFRC522:
         status, uid = self.reader.mfrc522_anticoll()
         if status != self.reader.MI_OK:
             return None, None
-        tag_id = self.uid_to_num(uid)
+        tag_id = self.uid_to_number(uid)
         self.reader.mfrc522_select_tag(uid)
         status = self.reader.mfrc522_auth(self.reader.PICC_AUTHENT1A, 11, self.KEYS, uid)
         text_read = ""
@@ -58,7 +58,7 @@ class SimpleMFRC522:
         status, uid = self.reader.mfrc522_anticoll()
         if status != self.reader.MI_OK:
             return None, None
-        tag_id = self.uid_to_num(uid)
+        tag_id = self.uid_to_number(uid)
         self.reader.mfrc522_select_tag(uid)
         status = self.reader.mfrc522_auth(self.reader.PICC_AUTHENT1A, 11, self.KEYS, uid)
         self.reader.mfrc522_read(11)
@@ -72,8 +72,10 @@ class SimpleMFRC522:
         self.reader.mfrc522_stop_crypto1()
         return tag_id, text[:len(self.BLOCK_ADDRESSES) * 16]
 
-    def uid_to_num(self, uid):
-        n = 0
-        for i in range(0, 5):
-            n = n * 256 + uid[i]
-        return n
+    @staticmethod
+    def uid_to_number(uid):
+        number = 0
+        for index, character in enumerate(uid):
+            number = number * 256 + character
+            if index == 4:
+                return number
