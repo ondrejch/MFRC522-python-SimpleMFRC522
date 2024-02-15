@@ -29,26 +29,21 @@ class SimpleMFRC522:
         return None if status != self.reader.MI_OK else self.uid_to_num(uid)
 
     def read_no_block(self):
-        (status, TagType) = self.reader.mfrc522_request(self.reader.PICC_REQIDL)
+        status, _ = self.reader.mfrc522_request(self.reader.PICC_REQIDL)
         if status != self.reader.MI_OK:
             return None, None
-        (status, uid) = self.reader.mfrc522_anticoll()
+        status, uid = self.reader.mfrc522_anticoll()
         if status != self.reader.MI_OK:
             return None, None
-        id = self.uid_to_num(uid)
+        tag_id = self.uid_to_num(uid)
         self.reader.mfrc522_select_tag(uid)
         status = self.reader.mfrc522_auth(self.reader.PICC_AUTHENT1A, 11, self.KEYS, uid)
-        data = []
         text_read = ""
         if status == self.reader.MI_OK:
-            for block_num in self.BLOCK_ADDRESSES:
-                block = self.reader.mfrc522_read(block_num)
-                if block:
-                    data += block
-            if data:
-                text_read = "".join(chr(i) for i in data)
+            data = [self.reader.mfrc522_read(address) for address in self.BLOCK_ADDRESSES if self.reader.mfrc522_read(address)]
+            text_read = "".join(chr(i) for i in data)
         self.reader.mfrc522_stop_crypto1()
-        return id, text_read
+        return tag_id, text_read
 
     def write(self, text):
         id, text_in = self.write_no_block(text)
