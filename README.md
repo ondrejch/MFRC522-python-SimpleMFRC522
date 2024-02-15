@@ -20,6 +20,9 @@ def main():
         tag_id, text = reader.read()
         print(f'ID: {tag_id}\nText: {text}')
         sleep(1)
+
+if __name__ == '__main__':
+    main()
 ```
 
 Original ReadMe-Description:
