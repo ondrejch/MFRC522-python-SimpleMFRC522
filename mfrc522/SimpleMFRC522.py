@@ -52,13 +52,13 @@ class SimpleMFRC522:
                 return tag_id, text_in
 
     def write_no_block(self, text):
-        (status, TagType) = self.reader.mfrc522_request(self.reader.PICC_REQIDL)
+        status, _ = self.reader.mfrc522_request(self.reader.PICC_REQIDL)
         if status != self.reader.MI_OK:
             return None, None
-        (status, uid) = self.reader.mfrc522_anticoll()
+        status, uid = self.reader.mfrc522_anticoll()
         if status != self.reader.MI_OK:
             return None, None
-        id = self.uid_to_num(uid)
+        tag_id = self.uid_to_num(uid)
         self.reader.mfrc522_select_tag(uid)
         status = self.reader.mfrc522_auth(self.reader.PICC_AUTHENT1A, 11, self.KEYS, uid)
         self.reader.mfrc522_read(11)
@@ -67,12 +67,10 @@ class SimpleMFRC522:
             data.extend(
                 bytearray(text.ljust(len(self.BLOCK_ADDRESSES) * 16).encode("ascii"))
             )
-            i = 0
-            for block_num in self.BLOCK_ADDRESSES:
-                self.reader.mfrc522_write(block_num, data[(i * 16): (i + 1) * 16])
-                i += 1
+            for index, block_num in enumerate(self.BLOCK_ADDRESSES):
+                self.reader.mfrc522_write(block_num, data[(index * 16): (index + 1) * 16])
         self.reader.mfrc522_stop_crypto1()
-        return id, text[0 : (len(self.BLOCK_ADDRESSES) * 16)]
+        return tag_id, text[:len(self.BLOCK_ADDRESSES) * 16]
 
     def uid_to_num(self, uid):
         n = 0
