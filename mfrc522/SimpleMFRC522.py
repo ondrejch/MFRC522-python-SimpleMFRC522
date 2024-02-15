@@ -14,7 +14,6 @@ class SimpleMFRC522:
             if tag_id:
                 return tag_id, text
 
-
     def read_id(self):
         while True:
             id_tag = self.read_id_no_block()
@@ -37,10 +36,16 @@ class SimpleMFRC522:
             return None, None
         tag_id = self.uid_to_number(uid)
         self.reader.mfrc522_select_tag(uid)
-        status = self.reader.mfrc522_auth(self.reader.PICC_AUTHENT1A, 11, self.KEYS, uid)
+        status = self.reader.mfrc522_auth(
+            self.reader.PICC_AUTHENT1A, 11, self.KEYS, uid
+        )
         text_read = ""
         if status == self.reader.MI_OK:
-            data = [self.reader.mfrc522_read(address) for address in self.BLOCK_ADDRESSES if self.reader.mfrc522_read(address)]
+            data = [
+                self.reader.mfrc522_read(address)
+                for address in self.BLOCK_ADDRESSES
+                if self.reader.mfrc522_read(address)
+            ]
             text_read = "".join(chr(i) for i in data)
         self.reader.mfrc522_stop_crypto1()
         return tag_id, text_read
@@ -60,7 +65,9 @@ class SimpleMFRC522:
             return None, None
         tag_id = self.uid_to_number(uid)
         self.reader.mfrc522_select_tag(uid)
-        status = self.reader.mfrc522_auth(self.reader.PICC_AUTHENT1A, 11, self.KEYS, uid)
+        status = self.reader.mfrc522_auth(
+            self.reader.PICC_AUTHENT1A, 11, self.KEYS, uid
+        )
         self.reader.mfrc522_read(11)
         if status == self.reader.MI_OK:
             data = bytearray()
@@ -68,9 +75,11 @@ class SimpleMFRC522:
                 bytearray(text.ljust(len(self.BLOCK_ADDRESSES) * 16).encode("ascii"))
             )
             for index, block_num in enumerate(self.BLOCK_ADDRESSES):
-                self.reader.mfrc522_write(block_num, data[(index * 16): (index + 1) * 16])
+                self.reader.mfrc522_write(
+                    block_num, data[(index * 16) : (index + 1) * 16]
+                )
         self.reader.mfrc522_stop_crypto1()
-        return tag_id, text[:len(self.BLOCK_ADDRESSES) * 16]
+        return tag_id, text[: len(self.BLOCK_ADDRESSES) * 16]
 
     @staticmethod
     def uid_to_number(uid):
