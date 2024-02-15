@@ -4,6 +4,23 @@
 Original code from [pimylifeup](https://github.com/YudiNz/MFRC522-python-SimpleMFRC522).
 `RPi.GPIO` don't support the Raspberry Pi 5. In this fork I refactored the code to support also the Raspberry Pi 5.
 
+## Example Code
+
+The following code will read a tag from the MFRC522
+
+```python
+from time import sleep
+from mfrc522 import SimpleMFRC522
+
+
+def main():
+    reader = SimpleMFRC522()
+    while True:
+        print("Hold a tag near the reader")
+        tag_id, text = reader.read()
+        print(f'ID: {tag_id}\nText: {text}')
+        sleep(1)
+```
 
 Original ReadMe-Description:
 -----------------------------
