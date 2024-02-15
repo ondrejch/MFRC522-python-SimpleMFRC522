@@ -1,7 +1,7 @@
 import setuptools
 from pathlib import Path
 
-README_FILE = Path().resolve() / "README.md"
+README_FILE = Path(__file__).parent / "README.md"
 
 
 def main():
