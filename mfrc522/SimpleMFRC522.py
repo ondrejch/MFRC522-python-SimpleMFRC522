@@ -46,10 +46,10 @@ class SimpleMFRC522:
         return tag_id, text_read
 
     def write(self, text):
-        id, text_in = self.write_no_block(text)
-        while not id:
-            id, text_in = self.write_no_block(text)
-        return id, text_in
+        while True:
+            tag_id, text_in = self.write_no_block(text)
+            if tag_id:
+                return tag_id, text_in
 
     def write_no_block(self, text):
         (status, TagType) = self.reader.mfrc522_request(self.reader.PICC_REQIDL)
