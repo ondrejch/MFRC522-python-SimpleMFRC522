@@ -1,14 +1,15 @@
-!Caution! Do not use, the code is under development
+!Caution! Do not use in production, the code has not even been tested yet.
 ====================================================
 
 Original code from [pimylifeup](https://github.com/YudiNz/MFRC522-python-SimpleMFRC522).
-`RPi.GPIO` don't support the Raspberry Pi 5. In this fork I refactored the code to support also the Raspberry Pi 5.
+`RPi.GPIO` doesn't support the Raspberry Pi 5. In this fork I used `gpiozero` instead of `RPi.GPIO` to support also the Raspberry Pi 5.
 
-Create development environment
+Create development environment and install
 ---------------------
 
-For example this should work. You don't have to use `nano`, you can use your favorite editor. Add the example code below 
-in `read_tag.py`.
+Follow the steps below as an example for how to create a python environment and install `MFRC522.py`
+Note: You don't have to use `nano`, you can use your favorite editor. 
+Note: Add the "Example Code" below in `read_tag.py`.
 ```bash
 dennis@test:~ $ mkdir mfrc522_test/src -p
 dennis@test:~ $ python -m venv mfrc522_test/.venv
