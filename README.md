@@ -10,22 +10,21 @@ Create development environment
 For example this should work. You don't have to use `nano`, you can use your favorite editor. Add the example code below 
 in `read_tag.py`.
 ```bash
-mkdir mfrc522_test
-python -m venv ~/mfrc522_test/
-. ~/mfrc522_test/bin/activate
-(mfrc522_test) [dennis@dennis ~]$ mkdir ~/mfrc522_test/src
-(mfrc522_test) [dennis@dennis ~]$ git clone https://github.com/Dennis-89/MFRC522-python-SimpleMFRC522.git ~/mfrc522_test/src/
-Klone nach '/home/dennis/mfrc522_test/src'...
-remote: Enumerating objects: 205, done.
-remote: Counting objects: 100% (154/154), done.
-remote: Compressing objects: 100% (71/71), done.
-remote: Total 205 (delta 92), reused 140 (delta 83), pack-reused 51
-Empfange Objekte: 100% (205/205), 57.96 KiB | 1.29 MiB/s, fertig.
-Löse Unterschiede auf: 100% (93/93), fertig.
-
-python ~/mfrc522_test/src/setup.py install
-nano ~/mfrc522_test/read_tag.py
-python ~/mfrc522_test/read_tag.py
+dennis@test:~ $ mkdir mfrc522_test/src -p
+dennis@test:~ $ python -m venv mfrc522_test/.venv
+dennis@test:~ $ git clone https://github.com/Dennis-89/MFRC522-python-SimpleMFRC522.git mfrc522_test/src/
+Cloning into 'mfrc522_test/src'...
+remote: Enumerating objects: 211, done.
+remote: Counting objects: 100% (160/160), done.
+remote: Compressing objects: 100% (74/74), done.
+remote: Total 211 (delta 96), reused 145 (delta 86), pack-reused 51 (from 1)
+Receiving objects: 100% (211/211), 59.00 KiB | 1.34 MiB/s, done.
+Resolving deltas: 100% (97/97), done.
+dennis@test:~ $ . mfrc522_test/.venv/bin/activate
+(.venv) dennis@test:~ $ pip install -U setuptools
+(.venv) dennis@test:~ $ python mfrc522_test/src/setup.py install
+(.venv) dennis@test:~ $ nano mfrc522_test/read_tag.py
+(.venv) dennis@test:~ $ python mfrc522_test/read_tag.py
 ```
 
 ## Example Code
