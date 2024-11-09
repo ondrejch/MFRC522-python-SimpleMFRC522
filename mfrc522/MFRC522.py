@@ -278,8 +278,8 @@ class MFRC522:
             self.write_mfrc522(self.FIFO_DATA_REG, data)
         self.write_mfrc522(self.COMMAND_REG, self.PCD_CALCCRC)
 
-        for _ in range(255):
-            if self.read_mfrc522(self.DIVIRQ_REG) & 0x04:
+        for _ in range(255, 0, -1):
+            if not self.read_mfrc522(self.DIVIRQ_REG) & 0x04:
                 break
         return [
             self.read_mfrc522(self.CRC_RESULT_REG_L),
