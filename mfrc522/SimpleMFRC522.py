@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from . import MFRC522
 from itertools import chain
 
@@ -11,31 +13,37 @@ class SimpleMFRC522:
 
     def read(self):
         while True:
-            tag_id, text = self.read_no_block()
+            tag_id, text = self._read_no_block()
             if tag_id:
                 return tag_id, text
 
-    def read_id(self):
+    def write(self, text):
         while True:
-            id_tag = self.read_id_no_block()
+            tag_id, text_in = self._write_no_block(text)
+            if tag_id:
+                return tag_id, text_in
+
+    def _read_id(self):
+        while True:
+            id_tag = self._read_id_no_block()
             if id_tag:
                 return id_tag
 
-    def read_id_no_block(self):
+    def _read_id_no_block(self):
         status, _ = self.reader.mfrc522_request(self.reader.PICC_REQIDL)
         if status != self.reader.MI_OK:
             return None
         status, uid = self.reader.mfrc522_anticoll()
-        return None if status != self.reader.MI_OK else self.uid_to_number(uid)
+        return None if status != self.reader.MI_OK else self._uid_to_number(uid)
 
-    def read_no_block(self):
+    def _read_no_block(self):
         status, _ = self.reader.mfrc522_request(self.reader.PICC_REQIDL)
         if status != self.reader.MI_OK:
             return None, None
         status, uid = self.reader.mfrc522_anticoll()
         if status != self.reader.MI_OK:
             return None, None
-        tag_id = self.uid_to_number(uid)
+        tag_id = self._uid_to_number(uid)
         self.reader.mfrc522_select_tag(uid)
         status = self.reader.mfrc522_auth(
             self.reader.PICC_AUTHENT1A, 11, self.KEYS, uid
@@ -44,7 +52,8 @@ class SimpleMFRC522:
         if status == self.reader.MI_OK:
             data = list(
                 chain.from_iterable(
-                    self.reader.mfrc522_read(address) for address in self.BLOCK_ADDRESSES
+                    self.reader.mfrc522_read(address)
+                    for address in self.BLOCK_ADDRESSES
                     if self.reader.mfrc522_read(address)
                 )
             )
@@ -52,20 +61,14 @@ class SimpleMFRC522:
         self.reader.mfrc522_stop_crypto1()
         return tag_id, text_read
 
-    def write(self, text):
-        while True:
-            tag_id, text_in = self.write_no_block(text)
-            if tag_id:
-                return tag_id, text_in
-
-    def write_no_block(self, text):
+    def _write_no_block(self, text):
         status, _ = self.reader.mfrc522_request(self.reader.PICC_REQIDL)
         if status != self.reader.MI_OK:
             return None, None
         status, uid = self.reader.mfrc522_anticoll()
         if status != self.reader.MI_OK:
             return None, None
-        tag_id = self.uid_to_number(uid)
+        tag_id = self._uid_to_number(uid)
         self.reader.mfrc522_select_tag(uid)
         status = self.reader.mfrc522_auth(
             self.reader.PICC_AUTHENT1A, 11, self.KEYS, uid
@@ -84,7 +87,7 @@ class SimpleMFRC522:
         return tag_id, text[: len(self.BLOCK_ADDRESSES) * 16]
 
     @staticmethod
-    def uid_to_number(uid):
+    def _uid_to_number(uid):
         number = 0
         for index, character in enumerate(uid):
             number = number * 256 + character
