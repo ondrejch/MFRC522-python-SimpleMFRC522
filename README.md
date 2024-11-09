@@ -5,6 +5,7 @@ Create development environment and install
 ---------------------
 
 Follow the steps below as an example for how to create a python environment and install `MFRC522.py`
+Note: You have to enable SPI in `sudo raspi-config` and RST-Pin is GPIO22.
 Note: You don't have to use `nano`, you can use your favorite editor. 
 Note: Add the "Example Code" below in `read_tag.py`.
 ```bash
