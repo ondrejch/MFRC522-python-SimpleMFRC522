@@ -8,7 +8,6 @@ Follow the steps below as an example for how to create a python environment and 
 Note: You don't have to use `nano`, you can use your favorite editor. 
 Note: Add the "Example Code" below in `read_tag.py`.
 ```bash
-dennis@test:~ $ sudo apt-get install python3-dev
 dennis@test:~ $ mkdir mfrc522_test/src -p
 dennis@test:~ $ python -m venv mfrc522_test/.venv
 dennis@test:~ $ git clone https://github.com/Dennis-89/MFRC522-python-SimpleMFRC522.git mfrc522_test/src/
@@ -20,11 +19,9 @@ remote: Total 211 (delta 96), reused 145 (delta 86), pack-reused 51 (from 1)
 Receiving objects: 100% (211/211), 59.00 KiB | 1.34 MiB/s, done.
 Resolving deltas: 100% (97/97), done.
 dennis@test:~ $ . mfrc522_test/.venv/bin/activate
-(.venv) dennis@test:~ $ pip install gpiozero
 (.venv) dennis@test:~ $ pip install lgpio
-(.venv) dennis@test:~ $ pip install setuptools==58.2.0
 (.venv) dennis@test:~ $ cd mfrc522_test/src
-(.venv) dennis@test:mfrc522_test/src $ python setup.py install
+(.venv) dennis@test:mfrc522_test/src $ pip install .
 (.venv) dennis@test:mfrc522_test $ cd ..
 (.venv) dennis@test:mfrc522_test $ nano read_tag.py
 (.venv) dennis@test:mfrc522_test $ python read_tag.py
