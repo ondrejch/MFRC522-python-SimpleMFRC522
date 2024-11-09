@@ -258,13 +258,15 @@ class MFRC522:
         status, back_data, _ = self.mfrc522_to_card(
             self.PCD_TRANSCEIVE, [self.PICC_ANTICOLL, 0x20]
         )
+        if status != self.MI_OK:
+            return status, back_data
         serial_number = 0
         for data in back_data:
             serial_number ^= data
         try:
             if serial_number != back_data[4]:
                 return self.MI_ERR, back_data
-        except KeyError:
+        except IndexError:
             return self.MI_ERR, back_data
         return status, back_data
 
