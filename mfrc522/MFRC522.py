@@ -261,9 +261,9 @@ class MFRC522:
         if status != self.MI_OK:
             return status, back_data
         serial_number = 0
-        for data in back_data:
-            serial_number ^= data
         try:
+            for data in back_data[:4]:
+                serial_number ^= data
             if serial_number != back_data[4]:
                 return self.MI_ERR, back_data
         except IndexError:
