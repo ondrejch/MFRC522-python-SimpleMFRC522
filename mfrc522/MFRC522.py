@@ -127,7 +127,7 @@ class MFRC522:
 
     SERNUM = []
 
-    def __init__(self, bus=0, device=0, spd=1000000, pin_rst=15, debug_level="WARNING"):
+    def __init__(self, bus=0, device=0, spd=1000000, pin_rst=22, debug_level="WARNING"):
         self.spi = spidev.SpiDev()
         self.spi.open(bus, device)
         self.spi.max_speed_hz = spd
@@ -135,8 +135,8 @@ class MFRC522:
         self.logger = logging.getLogger("mfrc522Logger")
         self.logger.addHandler(logging.StreamHandler())
         self.logger.setLevel(logging.getLevelName(debug_level))
-        self.rst = DigitalOutputDevice(pin_rst)
-        self.rst.on()
+        rst = DigitalOutputDevice(pin_rst)
+        rst.on()
         self.mfrc522_init()
 
     def mfrc522_reset(self):
@@ -190,9 +190,9 @@ class MFRC522:
         if command == self.PCD_TRANSCEIVE:
             self.set_bit_mask(self.BIT_FRAMING_REG, 0x80)
 
-        for index in range(2000):
+        for index in range(2000, 0, -1):
             chip_value = self.read_mfrc522(self.COMMIRQ_REG)
-            if index != 0 and chip_value & 0x01 and chip_value & wait_irq:
+            if ~(index != 0 and ~(chip_value & 0x01) and ~(chip_value & wait_irq)):
                 break
 
         self.clear_bit_mask(self.BIT_FRAMING_REG, 0x80)
