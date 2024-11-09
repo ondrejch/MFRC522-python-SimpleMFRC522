@@ -1,4 +1,5 @@
 from . import MFRC522
+from itertools import chain
 
 
 class SimpleMFRC522:
@@ -41,11 +42,12 @@ class SimpleMFRC522:
         )
         text_read = ""
         if status == self.reader.MI_OK:
-            data = [
-                self.reader.mfrc522_read(address)
-                for address in self.BLOCK_ADDRESSES
-                if self.reader.mfrc522_read(address)
-            ]
+            data = list(
+                chain.from_iterable(
+                    [self.reader.read_mfrc522(address)] for address in self.BLOCK_ADDRESSES
+                    if self.reader.read_mfrc522(address)
+                )
+            )
             text_read = "".join(chr(i) for i in data)
         self.reader.mfrc522_stop_crypto1()
         return tag_id, text_read
