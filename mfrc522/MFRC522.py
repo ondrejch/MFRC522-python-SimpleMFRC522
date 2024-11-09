@@ -249,7 +249,7 @@ class MFRC522:
     def mfrc522_request(self, req_mode):
         self.write_mfrc522(self.BIT_FRAMING_REG, 0x07)
         status, _, back_bits = self.mfrc522_to_card(self.PCD_TRANSCEIVE, [req_mode])
-        if status != self.MI_OK or back_bits != 0x10:
+        if (status != self.MI_OK) | (back_bits != 0x10):
             status = self.MI_ERR
         return status, back_bits
 
