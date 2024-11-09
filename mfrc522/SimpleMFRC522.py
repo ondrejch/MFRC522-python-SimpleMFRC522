@@ -44,7 +44,8 @@ class SimpleMFRC522:
         if status == self.reader.MI_OK:
             data = list(
                 chain.from_iterable(
-                    [self.reader.mfrc522_read(address)] for address in self.BLOCK_ADDRESSES
+                    self.reader.mfrc522_read(address) for address in self.BLOCK_ADDRESSES
+                    if self.reader.mfrc522_read(address)
                 )
             )
             text_read = "".join(chr(i) for i in data)
