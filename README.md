@@ -26,7 +26,7 @@ dennis@test:~ $ . mfrc522_test/.venv/bin/activate
 (.venv) dennis@test:~ $ cd mfrc522_test/src
 (.venv) dennis@test:mfrc522_test/src $ python setup.py install
 (.venv) dennis@test:mfrc522_test $ cd ..
-(.venv) dennis@test:mfrc522_test $ nano mfrc522_test/read_tag.py
+(.venv) dennis@test:mfrc522_test $ nano read_tag.py
 (.venv) dennis@test:mfrc522_test $ python read_tag.py
 ```
 
