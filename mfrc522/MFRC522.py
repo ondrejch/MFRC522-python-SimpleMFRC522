@@ -148,6 +148,7 @@ class MFRC522:
     def read_mfrc522(self, addr):
         return self.spi.xfer2([((addr << 1) & 0x7E) | 0x80, 0])[1]
 
+
     def close_mfrc522(self):
         self.spi.close()
 
@@ -330,7 +331,7 @@ class MFRC522:
         status, back_data, back_len = self.mfrc522_to_card(self.PCD_TRANSCEIVE, buffer)
         if status != self.MI_OK or back_len != 4 or (back_data[0] & 0x0F) != 0x0A:
             status = self.MI_ERR
-        self.logger.debug(f"{back_len} backdata &0x0F == 0x0A {back_data[0] & 15}")
+        self.logger.debug(f"{back_len} backdata &0x0F == 0x0A {back_data[0] & 0x0F}")
         if status == self.MI_OK:
             buffer = [data for index, data in enumerate(write_data) if index < 16]
             buffer.extend(self.calculate_crc(buffer))
