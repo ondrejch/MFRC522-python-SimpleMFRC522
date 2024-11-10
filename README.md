@@ -1,7 +1,7 @@
 Original code from [pimylifeup](https://github.com/YudiNz/MFRC522-python-SimpleMFRC522).
 `RPi.GPIO` doesn't support the Raspberry Pi 5. In this fork I used `gpiozero` instead of `RPi.GPIO` to support also the Raspberry Pi 5.
 
-Create development environment and install
+Create virtual environment and install
 ---------------------
 
 Follow the steps below as an example for how to create a python environment and install `MFRC522.py`
