@@ -1,3 +1,4 @@
+from time import sleep
 from mfrc522 import StoreMFRC522
 key = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]
 
@@ -33,6 +34,7 @@ def main():
             # Disconnect
             base_rc522.mfrc522_stop_crypto1()
 
+        sleep(1)
 
 
 if __name__ == '__main__':

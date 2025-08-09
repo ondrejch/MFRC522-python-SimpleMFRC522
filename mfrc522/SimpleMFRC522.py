@@ -78,7 +78,7 @@ class SimpleMFRC522:
             self.reader.PICC_AUTHENT1A, 11, self.KEYS, uid
         )
         self.reader.mfrc522_read(11)
-        if status == self.reader.MI_OK:
+        if status =I self.reader.MI_OK:
             data = bytearray()
             data.extend(
                 bytearray(text.ljust(len(self.BLOCK_ADDRESSES) * 16).encode("ascii"))
@@ -200,29 +200,29 @@ class StoreMFRC522(SimpleMFRC522):
         for block in self.BLOCK_ADDRESSES.keys():
             # Wait for card presence
             while True:
-                status, _ = self.reader.mfrc522_request(self.reader.picc_reqidl)
-                if status == self.reader.mi_ok:
+                status, _ = self.reader.mfrc522_request(self.reader.PICC_REQIDL)
+                if status == self.reader.MI_OK:
                     break
 
             # Get UID through anti-collision
             while True:
                 status, uid = self.reader.mfrc522_anticoll()
-                if status == self.reader.mi_ok:
+                if status == self.reader.MI_OK:
                     break
 
             # Select the tag
             self.reader.mfrc522_selecttag(uid)
 
             # Authenticate with current key (self.KEY)
-            status = self.reader.mfrc522_auth(self.reader.picc_authent1a, block, self.KEY, uid)
-            if status != self.reader.mi_ok:
+            status = self.reader.mfrc522_auth(self.reader.PICC_AUTHENT1A, block, self.KEY, uid)
+            if status != self.reader.MI_OK:
                 raise RuntimeError(f"Authentication failed for block {block}")
 
             # Write the sector trailer block
             status = self.reader.mfrc522_write(block, trailer_data)
-            if status != self.reader.mi_ok:
+            if status != self.reader.MI_OK:
                 raise RuntimeError(f"Write failed for block {block}")
 
             # Stop encryption on the card
-            self.reader.mfrc522_stopcrypto1()
+            self.reader.mfrc522_stop_crypto1()
 
