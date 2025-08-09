@@ -182,6 +182,7 @@ class StoreMFRC522(SimpleMFRC522):
 
 
     def write_password_to_blocks(self, password):
+#       raise NotImplementedError("Seems to brick the RFID tag, but maybe I dont know how to read it.")
         """
         Write a 6-byte password key as both Key A and Key B plus access bits
         into sector trailer blocks in self.BLOCK_ADDRESSES.keys().
@@ -193,35 +194,45 @@ class StoreMFRC522(SimpleMFRC522):
             raise ValueError("Password must be a list of 6 integers (0-255)")
 
         access_bits = [0xFF, 0x07, 0x80, 0x69]
+        if password == [0, 0, 0, 0, 0, 0] or password == [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]:  # Set default password
+            password = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF])
         trailer_data = bytes(password + access_bits + password)
-        if password = [0, 0, 0, 0, 0, 0]:  # Set default password
-            trailer_data = bytes(password + access_bits + [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF])
+        print(f'writing password: {password}')
 
-        for block in self.BLOCK_ADDRESSES.keys():
-            # Wait for card presence
-            while True:
-                status, _ = self.reader.mfrc522_request(self.reader.PICC_REQIDL)
-                if status == self.reader.MI_OK:
-                    break
+        # Wait for card presence
+        while True:
+            status, _ = self.reader.mfrc522_request(self.reader.PICC_REQIDL)
+            if status == self.reader.MI_OK:
+                break
 
-            # Get UID through anti-collision
-            while True:
-                status, uid = self.reader.mfrc522_anticoll()
-                if status == self.reader.MI_OK:
-                    break
+        # Get UID through anti-collision
+        while True:
+            status, uid = self.reader.mfrc522_anticoll()
+            if status == self.reader.MI_OK:
+                break
 
+        # Set
+        trailer_blocks = [3]
+        trailer_blocks.extend(self.BLOCK_ADDRESSES.keys())
+        for block in trailer_blocks:
             # Select the tag
-            self.reader.mfrc522_selecttag(uid)
+            self.reader.mfrc522_select_tag(uid)
 
-            # Authenticate with current key (self.KEY)
-            status = self.reader.mfrc522_auth(self.reader.PICC_AUTHENT1A, block, self.KEY, uid)
+            # Authenticate with current key (self.KEYS)
+            status = self.reader.mfrc522_auth(self.reader.PICC_AUTHENT1A, block, self.KEYS, uid)
             if status != self.reader.MI_OK:
                 raise RuntimeError(f"Authentication failed for block {block}")
+            else:
+                print(f'Autheticated card {uid}')
 
-            # Write the sector trailer block
-            status = self.reader.mfrc522_write(block, trailer_data)
-            if status != self.reader.MI_OK:
-                raise RuntimeError(f"Write failed for block {block}")
+            self.reader.mfrc522_read(block)
+            if status == self.reader.MI_OK:
+                # Write the sector trailer block
+                status = self.reader.mfrc522_write(block, trailer_data)
+                if status != self.reader.MI_OK:
+                    raise RuntimeError(f"Write failed for block {block}")
+                else:
+                    print(f'Wrote new block data {trailer_data} ')
 
             # Stop encryption on the card
             self.reader.mfrc522_stop_crypto1()
