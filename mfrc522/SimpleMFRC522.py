@@ -179,3 +179,50 @@ class StoreMFRC522(SimpleMFRC522):
             slot_i += len(self.BLOCK_ADDRESSES[trailer_block])
         self.reader.mfrc522_stop_crypto1()
         return tag_id, text[: len(self.BLOCK_ADDRESSES) * 16]
+
+
+    def write_password_to_blocks(self, password):
+        """
+        Write a 6-byte password key as both Key A and Key B plus access bits
+        into sector trailer blocks in self.BLOCK_ADDRESSES.keys().
+
+        Args:
+            password (list[int]): List of 6 integers (each 0-255) representing the key.
+        """
+        if not (isinstance(password, list) and len(password) == 6 and all(isinstance(b, int) and 0 <= b <= 255 for b in password)):
+            raise ValueError("Password must be a list of 6 integers (0-255)")
+
+        access_bits = [0xFF, 0x07, 0x80, 0x69]
+        trailer_data = bytes(password + access_bits + password)
+        if password = [0, 0, 0, 0, 0, 0]:  # Set default password
+            trailer_data = bytes(password + access_bits + self.KEYS)
+
+        for block in self.BLOCK_ADDRESSES.keys():
+            # Wait for card presence
+            while True:
+                status, _ = self.reader.mfrc522_request(self.reader.picc_reqidl)
+                if status == self.reader.mi_ok:
+                    break
+
+            # Get UID through anti-collision
+            while True:
+                status, uid = self.reader.mfrc522_anticoll()
+                if status == self.reader.mi_ok:
+                    break
+
+            # Select the tag
+            self.reader.mfrc522_selecttag(uid)
+
+            # Authenticate with current key (self.KEY)
+            status = self.reader.mfrc522_auth(self.reader.picc_authent1a, block, self.KEY, uid)
+            if status != self.reader.mi_ok:
+                raise RuntimeError(f"Authentication failed for block {block}")
+
+            # Write the sector trailer block
+            status = self.reader.mfrc522_write(block, trailer_data)
+            if status != self.reader.mi_ok:
+                raise RuntimeError(f"Write failed for block {block}")
+
+            # Stop encryption on the card
+            self.reader.mfrc522_stopcrypto1()
+
