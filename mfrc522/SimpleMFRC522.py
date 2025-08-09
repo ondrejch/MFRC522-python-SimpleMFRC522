@@ -78,7 +78,7 @@ class SimpleMFRC522:
             self.reader.PICC_AUTHENT1A, 11, self.KEYS, uid
         )
         self.reader.mfrc522_read(11)
-        if status =I self.reader.MI_OK:
+        if status == self.reader.MI_OK:
             data = bytearray()
             data.extend(
                 bytearray(text.ljust(len(self.BLOCK_ADDRESSES) * 16).encode("ascii"))
@@ -195,7 +195,7 @@ class StoreMFRC522(SimpleMFRC522):
         access_bits = [0xFF, 0x07, 0x80, 0x69]
         trailer_data = bytes(password + access_bits + password)
         if password = [0, 0, 0, 0, 0, 0]:  # Set default password
-            trailer_data = bytes(password + access_bits + self.KEYS)
+            trailer_data = bytes(password + access_bits + [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF])
 
         for block in self.BLOCK_ADDRESSES.keys():
             # Wait for card presence
