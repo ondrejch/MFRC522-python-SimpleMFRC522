@@ -9,7 +9,7 @@ def main():
 
     setuptools.setup(
         name="mfrc522",
-        version="1.0.0",
+        version="1.0.1",
         author="Pi My Life Up / Dennis89",
         author_email="straub.dennis1@web.de",
         description="A library to integrate the MFRC522 RFID readers with the Raspberry Pi",

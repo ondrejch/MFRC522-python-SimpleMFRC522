@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+"""
+Adopted from https://github.com/Dennis-89/MFRC522-python-SimpleMFRC522.git
+"""
+
 from . import MFRC522
 from itertools import chain
 
@@ -93,3 +97,85 @@ class SimpleMFRC522:
             number = number * 256 + character
             if index == 4:
                 return number
+
+
+class StoreMFRC522(SimpleMFRC522):
+    """ Use more storage on the RFID card """
+    def __init__(self):
+        super().__init__()
+        self.BLOCK_ADDRESSES = {
+             7: [ 4,  5,  6],
+            11: [ 8,  9, 10],
+            15: [12, 13, 14],
+            19: [16, 17, 18],
+            23: [20, 21, 22],
+            27: [24, 25, 26],
+            31: [28, 29, 30],
+            35: [32, 33, 34],
+            39: [36, 37, 38],
+            43: [40, 41, 42],
+            47: [44, 45, 46],
+            51: [48, 49, 50],
+            55: [52, 53, 54],
+            59: [56, 57, 58],
+            63: [60, 61, 62]
+        }
+        self.BLOCK_SLOTS = sum(len(lst) for lst in self.BLOCK_ADDRESSES.values())
+
+    def _read_no_block(self):
+        status, _ = self.reader.mfrc522_request(self.reader.PICC_REQIDL)
+        if status != self.reader.MI_OK:
+            return None, None
+        status, uid = self.reader.mfrc522_anticoll()
+        if status != self.reader.MI_OK:
+            return None, None
+        tag_id = self._uid_to_number(uid)
+        self.reader.mfrc522_select_tag(uid)
+        data = []
+        text_read = ""
+        for trailer_block in self.BLOCK_ADDRESSES.keys():
+            status = self.reader.mfrc522_auth(
+                self.reader.PICC_AUTHENT1A, trailer_block, self.KEYS, uid)
+            if status == self.reader.MI_OK:
+                data.extend(
+                    list(
+                        chain.from_iterable(
+                            self.reader.mfrc522_read(address)
+                            for address in self.BLOCK_ADDRESSES[trailer_block]
+                            if self.reader.mfrc522_read(address)
+                        )
+                    )
+                )
+        if data:
+            text_read = "".join(chr(i) for i in data)
+
+        self.reader.mfrc522_stop_crypto1()
+        return tag_id, text_read
+
+    def _write_no_block(self, text):
+        status, _ = self.reader.mfrc522_request(self.reader.PICC_REQIDL)
+        if status != self.reader.MI_OK:
+            return None, None
+        status, uid = self.reader.mfrc522_anticoll()
+        if status != self.reader.MI_OK:
+            return None, None
+        tag_id = self._uid_to_number(uid)
+        self.reader.mfrc522_select_tag(uid)
+        data = bytearray()
+        data.extend(
+            bytearray(text.ljust(self.BLOCK_SLOTS * 16).encode("ascii"))
+        )
+        slot_i = 0
+        for trailer_block in self.BLOCK_ADDRESSES.keys():
+            status = self.reader.mfrc522_auth(
+                self.reader.PICC_AUTHENT1A, trailer_block, self.KEYS, uid
+            )
+            self.reader.mfrc522_read(trailer_block)
+            if status == self.reader.MI_OK:
+                for index, block_num in enumerate(self.BLOCK_ADDRESSES[trailer_block]):
+                    self.reader.mfrc522_write(
+                        block_num, data[((slot_i + index) * 16) : (slot_i + index + 1) * 16]
+                    )
+            slot_i += len(self.BLOCK_ADDRESSES[trailer_block])
+        self.reader.mfrc522_stop_crypto1()
+        return tag_id, text[: len(self.BLOCK_ADDRESSES) * 16]
