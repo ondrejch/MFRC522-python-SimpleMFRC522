@@ -324,3 +324,18 @@ class MFRC522:
         self.write_mfrc522(self.TX_AUTO_REG, 0x40)
         self.write_mfrc522(self.MODE_REG, 0x3D)
         self.antenna_on()
+
+    def mfrc522_dump_classic_1K(self, key, uid):
+        i = 0
+        while i < 64:
+            status = self.mfrc522_auth(self.PICC_AUTHENT1A, i, key, uid)
+            # Check if authenticated
+            if status == self.MI_OK:
+                data = self.mfrc522_read(i)
+                print(f"Sector {i}: {data}")
+
+            else:
+                print("Authentication error")
+            i = i+1
+
+
