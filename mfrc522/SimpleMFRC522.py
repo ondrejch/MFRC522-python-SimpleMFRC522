@@ -195,7 +195,7 @@ class StoreMFRC522(SimpleMFRC522):
 
         access_bits = [0xFF, 0x07, 0x80, 0x69]
         if password == [0, 0, 0, 0, 0, 0] or password == [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]:  # Set default password
-            password = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF])
+            password = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]
         trailer_data = bytes(password + access_bits + password)
         print(f'writing password: {password}')
 
