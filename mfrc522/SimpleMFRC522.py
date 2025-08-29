@@ -7,6 +7,8 @@ Adopted from https://github.com/Dennis-89/MFRC522-python-SimpleMFRC522.git
 from . import MFRC522
 from itertools import chain
 
+DEFAULT_KEYS = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]
+
 
 class SimpleMFRC522:
     KEYS = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]
@@ -165,7 +167,7 @@ class StoreMFRC522(SimpleMFRC522):
         data.extend(
             bytearray(text.ljust(self.BLOCK_SLOTS * 16).encode("ascii"))
         )
-        slot_i = 0
+        slot_i: int = 0
         for trailer_block in self.BLOCK_ADDRESSES.keys():
             status = self.reader.mfrc522_auth(
                 self.reader.PICC_AUTHENT1A, trailer_block, self.KEYS, uid
@@ -180,10 +182,11 @@ class StoreMFRC522(SimpleMFRC522):
         self.reader.mfrc522_stop_crypto1()
         return tag_id, text[: len(self.BLOCK_ADDRESSES) * 16]
 
-
     def write_password_to_blocks(self, password):
-        raise NotImplementedError("Seems to brick the RFID tag, but maybe I dont know how to read it.")
+        raise NotImplementedError("Seems to brick the RFID tag, needs more work (and more tags to bricks..).")
         """
+        Ideas for future - set keys A and B independently by different methods; keep the other code default for testing.
+
         Write a 6-byte password key as both Key A and Key B plus access bits
         into sector trailer blocks in self.BLOCK_ADDRESSES.keys().
 
@@ -194,8 +197,8 @@ class StoreMFRC522(SimpleMFRC522):
             raise ValueError("Password must be a list of 6 integers (0-255)")
 
         access_bits = [0xFF, 0x07, 0x80, 0x69]
-        if password == [0, 0, 0, 0, 0, 0] or password == [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]:  # Set default password
-            password = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]
+        if password == [0, 0, 0, 0, 0, 0] or password == DEFAULT_KEYS:  # Set default password
+            password = DEFAULT_KEYS
         trailer_data = bytes(password + access_bits + password)
         print(f'writing password: {password}')
 
@@ -211,7 +214,7 @@ class StoreMFRC522(SimpleMFRC522):
             if status == self.reader.MI_OK:
                 break
 
-        # Set
+        # Set all trailing sectors
         trailer_blocks = [3]
         trailer_blocks.extend(self.BLOCK_ADDRESSES.keys())
         for block in trailer_blocks:
@@ -223,7 +226,7 @@ class StoreMFRC522(SimpleMFRC522):
             if status != self.reader.MI_OK:
                 raise RuntimeError(f"Authentication failed for block {block}")
             else:
-                print(f'Autheticated card {uid}')
+                print(f'Authenticated card {uid}')
 
             self.reader.mfrc522_read(block)
             if status == self.reader.MI_OK:
@@ -236,4 +239,3 @@ class StoreMFRC522(SimpleMFRC522):
 
             # Stop encryption on the card
             self.reader.mfrc522_stop_crypto1()
-
