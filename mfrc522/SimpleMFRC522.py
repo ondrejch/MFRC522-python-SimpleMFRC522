@@ -182,7 +182,7 @@ class StoreMFRC522(SimpleMFRC522):
 
 
     def write_password_to_blocks(self, password):
-#       raise NotImplementedError("Seems to brick the RFID tag, but maybe I dont know how to read it.")
+        raise NotImplementedError("Seems to brick the RFID tag, but maybe I dont know how to read it.")
         """
         Write a 6-byte password key as both Key A and Key B plus access bits
         into sector trailer blocks in self.BLOCK_ADDRESSES.keys().
